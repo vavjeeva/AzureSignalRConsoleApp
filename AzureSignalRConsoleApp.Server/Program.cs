@@ -48,7 +48,8 @@ namespace AzureSignalRConsoleApp.Server
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("Bearer", serviceUtils.GenerateAccessToken(url, serverName));
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            request.Content = new StringContent(JsonConvert.SerializeObject(message), Encoding.UTF8, "application/json");
+            var messageContent = new MessageContent() { Target = "SendMessage", Arguments = new[] { serverName, message } };
+            request.Content = new StringContent(JsonConvert.SerializeObject(messageContent), Encoding.UTF8, "application/json");
 
             var response = await httpClient.SendAsync(request);
             if (response.StatusCode != HttpStatusCode.Accepted)
@@ -56,5 +57,12 @@ namespace AzureSignalRConsoleApp.Server
                 Console.WriteLine($"Sent error: {response.StatusCode}");
             }
         }
+    }
+
+    public class MessageContent
+    {
+        public string Target { get; set; }
+
+        public object[] Arguments { get; set; }
     }
 }
